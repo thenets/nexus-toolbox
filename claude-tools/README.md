@@ -7,7 +7,7 @@ MCP server configurations for Claude Code.
 Add the `mcp-atlassian` server to interact with Jira:
 
 ```bash
-claude mcp add jira -e JIRA_PERSONAL_TOKEN='xxx' -e JIRA_URL=https://issues.redhat.com -- uvx mcp-atlassian
+claude mcp add jira --scope user -e JIRA_PERSONAL_TOKEN='xxx' -e JIRA_URL=https://issues.redhat.com -- uvx mcp-atlassian
 ```
 
 ### Prerequisites
