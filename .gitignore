@@ -1,0 +1,13 @@
+# Temporary files
+TEMP.md
+*.tmp
+*.bak
+
+# Secrets
+.env
+*.pem
+*.key
+
+# OS files
+.DS_Store
+Thumbs.db
