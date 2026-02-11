@@ -8,9 +8,9 @@
 
 ## **Acceptance Criteria**
 
- * {{CRITERION_1}}
- * {{CRITERION_2}}
- * {{CRITERION_3}}
+- {{CRITERION_1}}
+- {{CRITERION_2}}
+- {{CRITERION_3}}
 
 ---
 
@@ -23,36 +23,38 @@
 {{COMPONENT_DESCRIPTION}}
 
 **Capabilities:**
- * {{CAPABILITY_1}}
- * {{CAPABILITY_2}}
+- {{CAPABILITY_1}}
+- {{CAPABILITY_2}}
 
 ## **Definition of Done**
- * {{DOD_ITEM_1}}
- * {{DOD_ITEM_2}}
- * All tests pass
- * Code reviewed and merged
+
+- {{DOD_ITEM_1}}
+- {{DOD_ITEM_2}}
+- All tests pass
+- Code reviewed and merged
 
 ## **Technical Notes**
 
 **Files to Create:**
- * `{{FILE_PATH}}`
+- `{{FILE_PATH}}`
 
 **Files to Modify:**
- * `{{FILE_PATH}}`
+- `{{FILE_PATH}}`
 
 **Key Considerations:**
- * {{CONSIDERATION_1}}
- * {{CONSIDERATION_2}}
+- {{CONSIDERATION_1}}
+- {{CONSIDERATION_2}}
 
 ## **Questions & Risks**
 
 **Questions:**
- * {{QUESTION_1}}
- * {{QUESTION_2}}
+- {{QUESTION_1}}
+- {{QUESTION_2}}
 
 **Risks & Mitigation:**
+
 1. **Risk:** {{RISK_DESCRIPTION}}
-   * **Mitigation:** {{MITIGATION_STRATEGY}}
+   - **Mitigation:** {{MITIGATION_STRATEGY}}
 
 ## **Additional Context**
 
@@ -61,7 +63,7 @@
 ## **References**
 
 Related Stories:
- * {{TICKET_KEY}}: {{TICKET_DESCRIPTION}}
+- {{TICKET_KEY}}: {{TICKET_DESCRIPTION}}
 
 Technical References:
- * [{{REFERENCE_TITLE}}]({{REFERENCE_URL}})
+- [{{REFERENCE_TITLE}}]({{REFERENCE_URL}})

@@ -46,10 +46,10 @@ Before generating content, **always check Jira for existing context**:
 
 ```
 # Check if epic already exists
-mcp__jira-mcp__jira_search(jql="project = AAP AND issuetype = Epic AND summary ~ 'spec-name'")
+mcp__jira__jira_search(jql="project = AAP AND issuetype = Epic AND summary ~ 'spec-name'")
 
 # Check for related tickets mentioned in the spec
-mcp__jira-mcp__jira_get_issue(issue_key="AAP-XXXXX")
+mcp__jira__jira_get_issue(issue_key="AAP-XXXXX")
 ```
 
 Use this context to:
@@ -67,6 +67,24 @@ Use this context to:
    - Read the existing ticket description for additional context
    - Generate content normally (will replace existing ticket in future)
 3. If creating new: proceed as normal
+
+### File Header Conventions
+
+Use these headers at the top of `.md` files to track ticket status:
+
+| Header | Meaning | Example |
+|--------|---------|---------|
+| `EXISTING: AAP-XXXXX` | Ticket already exists, content not yet synced | `EXISTING: AAP-12345` |
+| `CREATED: AAP-XXXXX` | Ticket created in Jira from this file | `CREATED: AAP-12345` |
+| `PARENT: ANSTRAT-YYYY` | Epic is linked to this parent Feature | `PARENT: ANSTRAT-1844` |
+
+Example epic.md header after creation:
+```
+CREATED: AAP-64620
+PARENT: ANSTRAT-1844
+
+# Epic Title
+```
 
 ### Step 2: Read the Spec
 
@@ -127,7 +145,7 @@ After user reviews and approves the `.md` files, create issues using MCP:
 
 ```python
 # Create story with all required fields
-mcp__jira-mcp__jira_create_issue(
+mcp__jira__jira_create_issue(
     project_key="AAP",
     summary="[Backend] Story Title",
     issue_type="Story",
@@ -153,10 +171,10 @@ additional_fields={
     "customfield_12315940": " * Criterion 1\n * Criterion 2\n * Criterion 3"
 }
 
-# WRONG - Markdown will NOT be converted for custom fields
+# WRONG - Markdown lists will NOT be converted for custom fields
 additional_fields={
-    "customfield_12315940": " * Criterion 1\n * Criterion 2\n * Criterion 3"  # This would work
-    # But " - Criterion 1" (Markdown list) would NOT be converted
+    "customfield_12315940": "- Criterion 1\n- Criterion 2\n- Criterion 3"
+    # This renders as plain text, NOT as a list!
 }
 ```
 
@@ -324,30 +342,32 @@ When calling `jira_create_issue` or `jira_update_issue`, use Markdown for descri
 
 ```markdown
 ## **User Story**
- * **As a** developer,
-**I want** feature X,
-**So that** benefit Y.
+
+- **As a** developer,
+- **I want** feature X,
+- **So that** benefit Y.
 
 ## **Description**
 
 Current Problems:
- * **Multiple requests**: Description here
- * **Latency**: Another description
+- **Multiple requests**: Description here
+- **Latency**: Another description
 
 **Proposed Solution:**
 
-Add `include` query parameter to `GET /api/v1/executions/{id}`:
- * `?include=workflow_definition` - Returns workflow structure
- * `?include=activities` - Returns activity states
+Add `include` query parameter to GET /api/v1/executions/{id}:
+- `?include=workflow_definition` - Returns workflow structure
+- `?include=activities` - Returns activity states
 
 ## **Definition of Done**
- * `ExecutionRead` schema extended
- * `include` parameter implemented
+
+- `ExecutionRead` schema extended
+- `include` parameter implemented
 
 ## **Technical Notes**
 
 Files to Modify:
- * `src/path/file.py` - Description
+- `src/path/file.py` - Description
 ```
 
 ---
@@ -386,7 +406,7 @@ Files to Modify:
 - Include specific file paths from the spec
 - Reference task IDs (B001, F001, etc.) when available
 - Link to related Jira tickets found during context gathering
-- **Always use bold inline code**: `*{{code}}*` not `{{code}}`
+- Use backticks for inline code in Markdown files: `` `code` ``
 
 ---
 
@@ -396,17 +416,53 @@ When creating issues via MCP, use these field mappings:
 
 | Field | ID / Key | Value Format | Required |
 |-------|----------|--------------|----------|
-| Epic Link | `customfield_12311140` | `"AAP-XXXXX"` | Yes |
+| Epic Name | `customfield_12311141` | `"Epic Title"` | Yes (Epics only) |
+| Epic Link | `customfield_12311140` | `"AAP-XXXXX"` | Yes (Stories only) |
 | Acceptance Criteria | `customfield_12315940` | Text with Jira markup | Yes |
 | Team/Product Area | `customfield_12319275` | `[{"value": "Project Nexus"}]` | Yes |
 | Component | `components` (in fields) | `"nexus"` or via update `[{"name": "nexus"}]` | Yes |
 | Story Points | `customfield_12310243` | `3.0` (numeric) | No |
 
+### Creating an Epic - Full Example
+
+```python
+# Step 1: Create the epic
+mcp__jira__jira_create_issue(
+    project_key="AAP",
+    summary="Epic Title Here",
+    issue_type="Epic",
+    description="## **Background**\n\n...<Markdown content>...\n\n## **User Stories**\n\n...",
+    components="nexus",
+    additional_fields={
+        "customfield_12311141": "Epic Title Here",  # Epic Name (REQUIRED for epics!)
+        "customfield_12315940": "h2. Acceptance Criteria\n\n*Scenario:* ...",  # Jira wiki!
+        "customfield_12319275": [{"value": "Project Nexus"}]
+    }
+)
+
+# Step 2: Link epic to parent Feature (if applicable)
+mcp__jira__jira_create_issue_link(
+    link_type="Incorporates",
+    inward_issue_key="AAP-XXXXX",   # The new epic
+    outward_issue_key="ANSTRAT-YYYY" # The parent Feature
+)
+# Result: Feature "incorporates" Epic, Epic "is incorporated by" Feature
+
+# Step 3: Update local file with created ticket ID
+# Add these lines to top of epic.md:
+# CREATED: AAP-XXXXX
+# PARENT: ANSTRAT-YYYY
+```
+
+**IMPORTANT: Epic Name Field**
+
+Epics require the `customfield_12311141` (Epic Name) field. This is separate from `summary` and must be provided or the API will return an error: "Epic Name is required."
+
 ### Creating a Story - Full Example
 
 ```python
 # Step 1: Create the issue
-mcp__jira-mcp__jira_create_issue(
+mcp__jira__jira_create_issue(
     project_key="AAP",
     summary="[Backend] Story Title Here",
     issue_type="Story",
